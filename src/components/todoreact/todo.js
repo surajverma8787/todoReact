@@ -11,8 +11,24 @@ const Todo = () => {
 
     const [inputData, setInputData] = useState("");
     const [items, setItems] = useState(getLocalData());
+    const [isEditItem, setisEditItem] = useState("");
+    const [toggleButton, settoggleButton] = useState(false);
 
     const updateItems = (item) => {
+        if (inputData && toggleButton) {
+            setItems(
+                items.map((currElem) => {
+                    if (currElem.id === isEditItem) {
+                        return { ...currElem, name: inputData };
+                    }
+                    return currElem;
+                })
+            )
+            setInputData([]);
+            setisEditItem();
+            settoggleButton(false);
+            return;
+        }
         if (item) {
             const myNewInputData = {
                 id: new Date().getTime().toString(),
@@ -41,19 +57,30 @@ const Todo = () => {
         localStorage.setItem("todolist", JSON.stringify(items));
     }, [items])
 
+    const editItem = (index) => {
+        const editedItem = items.find((currElem) => {
+            return currElem.id === index;
+        })
+        setInputData(editedItem.name);
+        setisEditItem(index);
+        settoggleButton(true);
+    }
+
 
     return (
         <>
             <div className="main-div">
                 <div className="child-div">
                     <figure>
-                        <img src="./images/todo.svg" alt="todologo" />
+                        <img src="./images/todo.png" alt="todologo" />
                         <figcaption>Add Your List Here ✌️</figcaption>
                     </figure>
                     <div className="addItems">
                         <input type="text" placeholder='✍️ Add Items'
                             className='form-control' value={inputData} onChange={(event) => setInputData(event.target.value)} />
-                        <i className="fa fa-plus add-btn" onClick={() => updateItems(inputData)}></i>
+                        {toggleButton ? <i className="far fa-edit add-btn" onClick={() => updateItems(inputData)}></i> :
+                            <i className="fa fa-plus add-btn" onClick={() => updateItems(inputData)}></i>}
+
                     </div>
                     <div className="showItems">
                         {
@@ -61,7 +88,7 @@ const Todo = () => {
                                 return <div className="eachItem" key={currElem.id}>
                                     <h3>{currElem.name}</h3>
                                     <div className="todo-btn">
-                                        <i className="far fa-edit add-btn"></i>
+                                        <i className="far fa-edit add-btn" onClick={() => editItem(currElem.id)}></i>
                                         <i className="far fa-trash-alt add-btn" onClick={() => deleteItem(currElem.id)}></i>
                                     </div>
                                 </div>
